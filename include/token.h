@@ -4,7 +4,7 @@
 #include <string>
 #include <regex>
 
-constexpr enum TokenType {
+enum TokenType {
     NewLine,
     Tab,
     Preface,
@@ -19,8 +19,8 @@ constexpr enum TokenType {
     EndOfFile,
 };
 
-const std::regex IDENTIFIER_RE("[a-zA-Z0-9_\.\'\"]+");
-const std::regex ARGUMENT_RE("[a-zA-Z0-9_\.\/]+");
+const std::regex IDENTIFIER_RE("[a-zA-Z0-9_\\.\'\"]+");
+const std::regex ARGUMENT_RE("[a-zA-Z0-9_\\.\\/]+");
 
 struct Token {
 public:

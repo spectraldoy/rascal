@@ -4,8 +4,8 @@
 #include <string>
 
 enum ResultType {
-    Ok,
-    Error,
+    OK,
+    ERROR,
 };
 
 template<typename T, typename E>
@@ -25,9 +25,9 @@ private:
 };
 
 template<typename T, typename E>
-Result<T, E> Ok(T value);
+static Result<T, E> Ok(T value);
 
 template<typename T, typename E>
-Result<T, E> Error(E error);
+static Result<T, E> Error(E error);
 
 #endif

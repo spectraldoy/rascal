@@ -21,7 +21,8 @@ Result<void*, std::string> Lexer::tokenize() {
                 if (res.isError()) {
                     return res;
                 }
-                std::string next_token_str = "" + current_char;
+                std::string next_token_str = "";
+                next_token_str.push_back(current_char);
                 Token next_token = Token::fromString(next_token_str);
                 this->parsed_program.push_back(next_token);
                 break;
