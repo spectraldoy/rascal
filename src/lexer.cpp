@@ -49,6 +49,11 @@ bool Lexer::tokenize() {
         }
     }
 
+    // Last token
+    if (!this->pushCurrentToken(line_number)) {
+        return false;
+    }
+
     Token eofToken(EndOfFile, "<EOF>");
     this->parsed_program.push_back(eofToken);
     return true;

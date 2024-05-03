@@ -8,12 +8,13 @@
  * @brief Here is the grammar for rascal: G is the starting symbol
  * G := R B | B
  * B := T B | S B | eps
- * R := preface: Q \n
- * T := tcp: Q \n
- * S := services: L \n
- * Q := \t I <id> Q \n | eps
- * I := <id> <space> I | eps
- * L := \t I on <space> <id>\n L | eps
+ * R := preface:\n Q \n
+ * T := tcp:\n Q \n
+ * S := services:\n L \n
+ * Q := \t <id> I\n Q | eps
+ * L := \t <id> <space> J on <space> <id>\n L | eps
+ * I := <space> <id> I | eps
+ * J := <id> <space> J | eps
  */
 class Grammar {
 public:
@@ -21,6 +22,7 @@ public:
     bool check();
 
 private:
+    Token currentToken() const;
     bool consumeToken();
     bool match(TokenType expected);
 
@@ -30,13 +32,12 @@ private:
     bool T();
     bool S();
     bool Q();
-    bool I();
     bool L();
+    bool I();
+    bool J();
 
     std::vector<Token> parsed_program;
-    size_t current_token_idx;
-    size_t next_token_idx;
-    Token current_token;
+    size_t token_idx;
 };
 
 #endif

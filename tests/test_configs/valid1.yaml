@@ -1,0 +1,12 @@
+preface:
+	author Aditya Gomatam
+	project rascal
+	version 0.0.0
+
+services:
+	serve ./static on /test_path
+	echo on /seventy_two
+
+tcp:
+	port 8080
+
