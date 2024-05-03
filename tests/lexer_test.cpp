@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "result.h"
 #include "gtest/gtest.h"
 
 TEST(LexerTest, IgnoreComment) {
@@ -9,8 +10,8 @@ TEST(LexerTest, IgnoreComment) {
         "\tname rascal\n"
         "\n";
     Lexer lex(program);
-    bool res = lex.tokenize();
-    ASSERT_TRUE(res);
+    Result res = lex.tokenize();
+    ASSERT_TRUE(res.isOk());
 
     std::vector<TokenType> expected;
     expected.push_back(Preface);
@@ -49,8 +50,8 @@ TEST(LexerTest, GetsServices) {
         "\tserve ./taillow/ on /tests/static\n"
         "\n";
     Lexer lex(program);
-    bool res = lex.tokenize();
-    ASSERT_TRUE(res);
+    Result res = lex.tokenize();
+    ASSERT_TRUE(res.isOk()) << res.getError();
 
     std::vector<TokenType> expected;
     expected.push_back(Preface);

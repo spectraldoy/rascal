@@ -1,13 +1,14 @@
 #include "grammar.h"
 #include "lexer.h"
+#include "result.h"
 #include "gtest/gtest.h"
 
 #include <string>
 
 std::vector<Token> parseProgram(std::string program) {
     Lexer lex(program);
-    bool res = lex.tokenize();
-    EXPECT_TRUE(res);
+    Result res = lex.tokenize();
+    EXPECT_TRUE(res.isOk());
     return lex.getParsedProgram();
 }
 
@@ -27,6 +28,20 @@ TEST(GrammarTest, SimpleValidFile) {
         "\n";
     std::vector<Token> parsed_program = parseProgram(program);
     Grammar grammar(parsed_program);
-    bool res = grammar.check();
-    ASSERT_TRUE(res);
+    Result res = grammar.check();
+    ASSERT_TRUE(res.isOk()) << res.getError();
+}
+
+TEST(GrammarTest, NoSepBetweenSections) {
+    std::string program =
+        "services:\n"
+        "\tserve ./static on /test_path\n"
+        "\techo on /seventy_two\n"
+        "tcp:\n"
+        "\tport 8080\n"
+        "\n";
+    std::vector<Token> parsed_program = parseProgram(program);
+    Grammar grammar(parsed_program);
+    Result res = grammar.check();
+    ASSERT_TRUE(res.isOk()) << res.getError();
 }

@@ -28,3 +28,34 @@ Token Token::fromString(std::string token_str) {
     }
     return Token(token_type, token_str);
 }
+
+std::string Token::toString() const {
+    return tokenTypeToString(token_type) + " " + token_str;
+}
+
+std::string tokenTypeToString(TokenType token_type) {
+    switch (token_type) {
+        case NewLine:
+            return "\n";
+        case Tab:
+            return "\t";
+        case Preface:
+            return "preface";
+        case Tcp:
+            return "tcp";
+        case Services:
+            return "services";
+        case Colon:
+            return ":";
+        case On:
+            return "on";
+        case Identifier:
+            return "Identifier";
+        case Space:
+            return " ";
+        case EndOfFile:
+            return "<EOF>";
+        default:
+            return "unknown";
+    }
+}

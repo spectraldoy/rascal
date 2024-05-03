@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include "grammar.h"
+#include "result.h"
 #include <iostream>
 #include <filesystem>
 #include <fstream>
@@ -27,17 +28,17 @@ int main(int argc, char** argv) {
     }
 
     Lexer lex(program);
-    bool res = lex.tokenize();
-    if (!res) {
-        std::cout << "Invalid syntax" << std::endl;
+    Result res = lex.tokenize();
+    if (res.isError()) {
+        std::cout << res.getError() << std::endl;
         exit(1);
     }
 
     std::vector<Token> parsed_program = lex.getParsedProgram();
     Grammar checker(parsed_program);
     res = checker.check();
-    if (!res) {
-        std::cout << "Doesn't follow grammar" << std::endl;
+    if (res.isError()) {
+        std::cout << res.getError() << std::endl;
         exit(1);
     }
 

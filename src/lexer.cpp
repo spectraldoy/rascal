@@ -2,7 +2,7 @@
 
 Lexer::Lexer(std::string program) : program(program), current_token_str(""), parsed_program() {}
 
-bool Lexer::tokenize() {
+Result Lexer::tokenize() {
     this->parsed_program.clear();
     this->current_token_str = "";
     size_t line_number = 1;
@@ -17,8 +17,9 @@ bool Lexer::tokenize() {
             case ' ':
             case ':': {
                 // push the currently collected token
-                if (!this->pushCurrentToken(line_number)) {
-                    return false;
+                Result res = this->pushCurrentToken(line_number);
+                if (res.isError()) {
+                    return res;
                 }
 
                 std::string next_token_str = "";
@@ -30,8 +31,9 @@ bool Lexer::tokenize() {
             // Ignore comment lines
             case '#': {
                 // Push the current token
-                if (!this->pushCurrentToken(line_number)) {
-                    return false;
+                Result res = this->pushCurrentToken(line_number);
+                if (res.isError()) {
+                    return res;
                 }
 
                 while (i < program.size() && program.at(i) != '\n') {
@@ -50,25 +52,25 @@ bool Lexer::tokenize() {
     }
 
     // Last token
-    if (!this->pushCurrentToken(line_number)) {
-        return false;
+    Result res = this->pushCurrentToken(line_number);
+    if (res.isError()) {
+        return res;
     }
 
     Token eofToken(EndOfFile, "<EOF>");
     this->parsed_program.push_back(eofToken);
-    return true;
+    return Result::Ok();
 }
 
 std::vector<Token> Lexer::getParsedProgram() const {
     return this->parsed_program;
 }
 
-bool Lexer::pushCurrentToken(size_t line_number) {
+Result Lexer::pushCurrentToken(size_t line_number) {
     if (this->current_token_str.size() > 0) {
         Token tok = Token::fromString(this->current_token_str);
         if (tok.token_type == TokenType::Unknown) {
-            std::cout << "Cannot parse token \"" << current_token_str << "\" on line " << line_number << std::endl;
-            return false;
+            return Result::Error("Cannot parse token \"" + current_token_str + "\" on line " + std::to_string(line_number));
         }
 
         this->parsed_program.push_back(tok);
@@ -76,5 +78,5 @@ bool Lexer::pushCurrentToken(size_t line_number) {
         this->current_token_str = "";
     }
 
-    return true;
+    return Result::Ok();
 }

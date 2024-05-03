@@ -1,117 +1,193 @@
 #include "grammar.h"
 
 Grammar::Grammar(std::vector<Token> parsed_program)
- : parsed_program(parsed_program), token_idx(0)
+ : parsed_program(parsed_program), token_idx(0), line_number(1)
 {}
 
-bool Grammar::check() {
+Result Grammar::check() {
     this->token_idx = 0;
-    return G();
+    this->line_number = 1;
+    return Goal();
 }
 
 Token Grammar::currentToken() const {
     return parsed_program[token_idx];
 }
 
-bool Grammar::consumeToken() {
+Result Grammar::consumeToken() {
     // Last token should be EOF
     if (token_idx < parsed_program.size() - 1) {
+        if (currentToken().token_type == NewLine) {
+            line_number += 1;
+        }
         token_idx += 1;
-        return true;
+        return Result::Ok();
     } else {
-        return currentToken().token_type == TokenType::EndOfFile;
+        if (currentToken().token_type == TokenType::EndOfFile) {
+            return Result::Ok();
+        } else {
+            return Result::Error("Last token is not EOF, but is " + currentToken().toString());
+        }
     }
 }
 
-bool Grammar::match(TokenType expected) {
+Result Grammar::match(TokenType expected) {
     if (currentToken().token_type == expected) {
         return consumeToken();
     } else {
-        return false;
+        return Result::Error(
+            "Expected " + tokenTypeToString(expected) + " but got "
+            + currentToken().toString() + dbgLineNumber()
+        );
     }
 }
 
-bool Grammar::G() {
+Result Grammar::Goal() {
     switch (currentToken().token_type) {
-        // G -> R B | B
         case Preface:
-            return R() && B() && match(EndOfFile);
+            return PrefaceSection() && Body() && match(EndOfFile);
         case Tcp:
         case Services:
-            return B() && match(EndOfFile);
+            return Body() && match(EndOfFile);
         case EndOfFile:
-            return true;
+            return Result::Ok();
         default:
-            return false;
+            return Result::Error(
+                currentToken().toString() + dbgLineNumber() + " does not match Goal"
+            );
     }
 }
 
-bool Grammar::B() {
+Result Grammar::Body() {
     switch (currentToken().token_type) {
         case Tcp:
-            return T() && B();
+            return TcpSection() && Body();
         case Services:
-            return S() && B();
+            return ServicesSection() && Body();
         case EndOfFile:
-            return true;
+            return Result::Ok();
         default:
-            return false;
+            return Result::Error(
+                currentToken().toString() + dbgLineNumber() + " does not match Body"
+            );;
     }
 }
 
-bool Grammar::R() {
-    return match(Preface) && match(Colon) && match(NewLine) && Q() && match(NewLine);
+Result Grammar::PrefaceSection() {
+    return match(Preface) && match(Colon) && match(NewLine) && U() && N();
 }
 
-bool Grammar::T() {
-    return match(Tcp) && match(Colon) && match(NewLine) && Q() && match(NewLine);
+Result Grammar::TcpSection() {
+    return match(Tcp) && match(Colon) && match(NewLine) && Q() && N();
 }
 
-bool Grammar::S() {
-    return match(Services) && match(Colon) && match(NewLine) && L() && match(NewLine);
+Result Grammar::ServicesSection() {
+    return match(Services) && match(Colon) && match(NewLine) && L() && N();
 }
 
-bool Grammar::Q() {
+Result Grammar::U() {
+    // Within preface, we match everything
+    switch (this->currentToken().token_type) {
+        case Tab:
+            return match(Tab) && A() && match(NewLine) && U();
+        case NewLine:
+        case EndOfFile:
+            return Result::Ok();
+        default:
+            return Result::Error(
+                currentToken().toString() + dbgLineNumber() + " does not match U"
+            );
+    }
+}
+
+Result Grammar::Q() {
     switch (this->currentToken().token_type) {
         case Tab:
             return match(Tab) && match(Identifier) && I() && match(NewLine) && Q();
         case NewLine:
-            return true;
+        case EndOfFile:
+            return Result::Ok();
         default:
-            return false;
+            return Result::Error(
+                currentToken().toString() + dbgLineNumber() + " does not match Q"
+            );
     }
 }
 
-bool Grammar::L() {
+Result Grammar::L() {
     switch (this->currentToken().token_type) {
         case Tab:
             return match(Tab) && match(Identifier) && match(Space) && J() && match(On) && match(Space) && match(Identifier) && match(NewLine) && L();
         case NewLine:
-            return true;
+        case Tcp:
+        case Services:
+        case EndOfFile:
+            return Result::Ok();
         default:
-            return false;
+            return Result::Error(
+                currentToken().toString() + dbgLineNumber() + " does not match L"
+            );
     }
 }
 
-bool Grammar::I() {
+Result Grammar::A() {
+    // Match anything until a newline
+    switch (this->currentToken().token_type) {
+        case NewLine:
+            return Result::Ok();
+        case Unknown:
+        case EndOfFile:
+            return Result::Error(
+                "Invalid token " + currentToken().toString() + dbgLineNumber() +
+                " while matching A"
+            );
+        default:
+            return match(this->currentToken().token_type) && A();
+    }
+}
+
+Result Grammar::I() {
     switch (this->currentToken().token_type) {
         case Space:
             return match(Space) && match(Identifier) && I();
         case NewLine:
-            return true;
+            return Result::Ok();
         default:
-            return false;
+            return Result::Error(
+                currentToken().toString() + dbgLineNumber() + " does not match I"
+            );
     }
 }
 
-bool Grammar::J() {
+Result Grammar::J() {
     switch (this->currentToken().token_type) {
         case Identifier:
             return match(Identifier) && match(Space) && J();
         case On:
-            return true;
+            return Result::Ok();
         default:
-            return false;
+            return Result::Error(
+                currentToken().toString() + dbgLineNumber() + " does not match J"
+            );
     }
 }
 
+Result Grammar::N() {
+    switch (this->currentToken().token_type) {
+        case NewLine:
+            return match(NewLine) && N();
+        case Tab:
+        case Services:
+        case Tcp:
+        case EndOfFile:
+            return Result::Ok();
+        default:
+            return Result::Error(
+                currentToken().toString() + dbgLineNumber() + " does not match N"
+            );;
+    }
+}
+
+std::string Grammar::dbgLineNumber() const {
+    return " on line " + std::to_string(line_number);
+}

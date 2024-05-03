@@ -38,19 +38,20 @@ include_directories(include)
 # libraries
 add_library(grammar_lib src/grammar.cpp)
 add_library(token_lib src/token.cpp)
+add_library(result_lib src/result.cpp)
 add_library(lexer_lib src/lexer.cpp)
 
 # Main executable
 add_executable(rascal src/main.cpp)
-target_link_libraries(rascal grammar_lib token_lib lexer_lib)
+target_link_libraries(rascal grammar_lib token_lib lexer_lib result_lib)
 
 # Test Grammar checker
 add_executable(grammar_lib_test tests/grammar_test.cpp)
-target_link_libraries(grammar_lib_test grammar_lib lexer_lib token_lib gtest_main)
+target_link_libraries(grammar_lib_test grammar_lib lexer_lib result_lib token_lib gtest_main)
 
 # Test Lexer
 add_executable(lexer_lib_test tests/lexer_test.cpp)
-target_link_libraries(lexer_lib_test lexer_lib token_lib gtest_main)
+target_link_libraries(lexer_lib_test lexer_lib token_lib result_lib gtest_main)
 
 # Configure gtest
 gtest_discover_tests(grammar_lib_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
