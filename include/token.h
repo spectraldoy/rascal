@@ -2,6 +2,7 @@
 #define TOKEN_H
 
 #include <string>
+#include <regex>
 
 constexpr enum TokenType {
     NewLine,
@@ -9,18 +10,22 @@ constexpr enum TokenType {
     Preface,
     Tcp,
     Services,
+    Colon,
     On,
-    PathString,
+    Argument,
     Identifier,
     Space,
-    Comment,
     Unknown,
     EndOfFile,
 };
 
+const std::regex IDENTIFIER_RE("[a-zA-Z0-9_\.\'\"]+");
+const std::regex ARGUMENT_RE("[a-zA-Z0-9_\.\/]+");
+
 struct Token {
 public:
     Token(TokenType token_type, std::string token_str);
+    static Token fromString(std::string token_str);
     TokenType token_type;
     std::string token_str;
 };
