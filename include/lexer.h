@@ -2,18 +2,18 @@
 #define PARSER_H
 
 #include "token.h"
-#include "result.h"
 #include <vector>
 #include <string>
+#include <iostream>
 
 class Lexer {
 public:
     Lexer(std::string program);
-    Result<void*, std::string> tokenize();
+    bool tokenize();
     std::vector<Token> getParsedProgram() const;
 
 private:
-    Result<void*, std::string> pushCurrentToken(size_t line_number);
+    bool pushCurrentToken(size_t line_number);
 
     std::string program;
     std::string current_token_str;

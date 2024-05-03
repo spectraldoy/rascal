@@ -21,8 +21,6 @@ Token Token::fromString(std::string token_str) {
         token_type = TokenType::Colon;
     } else if (token_str == "on") {
         token_type = TokenType::On;
-    } else if (std::regex_match(token_str, ARGUMENT_RE)) {
-        token_type = TokenType::Argument;
     } else if (std::regex_match(token_str, IDENTIFIER_RE)) {
         token_type = TokenType::Identifier;
     } else if (token_str == " ") {

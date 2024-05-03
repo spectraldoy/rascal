@@ -2,7 +2,7 @@
 
 Lexer::Lexer(std::string program) : program(program), current_token_str(""), parsed_program() {}
 
-Result<void*, std::string> Lexer::tokenize() {
+bool Lexer::tokenize() {
     this->parsed_program.clear();
     this->current_token_str = "";
     size_t line_number = 1;
@@ -17,10 +17,10 @@ Result<void*, std::string> Lexer::tokenize() {
             case ' ':
             case ':': {
                 // push the currently collected token
-                Result<void*, std::string> res = this->pushCurrentToken(line_number);
-                if (res.isError()) {
-                    return res;
+                if (!this->pushCurrentToken(line_number)) {
+                    return false;
                 }
+
                 std::string next_token_str = "";
                 next_token_str.push_back(current_char);
                 Token next_token = Token::fromString(next_token_str);
@@ -30,9 +30,8 @@ Result<void*, std::string> Lexer::tokenize() {
             // Ignore comment lines
             case '#': {
                 // Push the current token
-                Result<void*, std::string> res = this->pushCurrentToken(line_number);
-                if (res.isError()) {
-                    return res;
+                if (!this->pushCurrentToken(line_number)) {
+                    return false;
                 }
 
                 while (i < program.size() && program.at(i) != '\n') {
@@ -40,7 +39,7 @@ Result<void*, std::string> Lexer::tokenize() {
                 }
                 // If we actually found a newline, ignore, it's part of the comment
                 if (program.at(i) == '\n') {
-                    i += 1;
+                    // i++ will already push past this \n
                     line_number += 1;
                 }
                 break;
@@ -50,21 +49,21 @@ Result<void*, std::string> Lexer::tokenize() {
         }
     }
 
-    // This syntax sucks
-    return Ok<void*, std::string>(nullptr);
+    Token eofToken(EndOfFile, "<EOF>");
+    this->parsed_program.push_back(eofToken);
+    return true;
 }
 
 std::vector<Token> Lexer::getParsedProgram() const {
     return this->parsed_program;
 }
 
-Result<void*, std::string> Lexer::pushCurrentToken(size_t line_number) {
+bool Lexer::pushCurrentToken(size_t line_number) {
     if (this->current_token_str.size() > 0) {
         Token tok = Token::fromString(this->current_token_str);
         if (tok.token_type == TokenType::Unknown) {
-            return Error<void*, std::string>(
-                "Cannot parse token \"" + current_token_str + "\" on line " + std::to_string(line_number)
-            );
+            std::cout << "Cannot parse token \"" << current_token_str << "\" on line " << line_number << std::endl;
+            return false;
         }
 
         this->parsed_program.push_back(tok);
@@ -72,5 +71,5 @@ Result<void*, std::string> Lexer::pushCurrentToken(size_t line_number) {
         this->current_token_str = "";
     }
 
-    return Ok<void*, std::string>(nullptr);
+    return true;
 }

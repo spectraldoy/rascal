@@ -12,15 +12,13 @@ enum TokenType {
     Services,
     Colon,
     On,
-    Argument,
     Identifier,
     Space,
     Unknown,
     EndOfFile,
 };
 
-const std::regex IDENTIFIER_RE("[a-zA-Z0-9_\\.\'\"]+");
-const std::regex ARGUMENT_RE("[a-zA-Z0-9_\\.\\/]+");
+const std::regex IDENTIFIER_RE("[a-zA-Z0-9_\\.\\/\'\"]+");
 
 struct Token {
 public:
