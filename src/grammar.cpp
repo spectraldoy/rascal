@@ -91,6 +91,8 @@ Result Grammar::U() {
         case Tab:
             return match(Tab) && A() && match(NewLine) && U();
         case NewLine:
+        case Services:
+        case Tcp:
         case EndOfFile:
             return Result::Ok();
         default:
@@ -105,6 +107,8 @@ Result Grammar::Q() {
         case Tab:
             return match(Tab) && match(Identifier) && I() && match(NewLine) && Q();
         case NewLine:
+        case Services:
+        case Tcp:
         case EndOfFile:
             return Result::Ok();
         default:

@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: ./rascal <file>" << std::endl;
+        std::cout << "Usage: build/bin/rascal <file>" << std::endl;
         exit(1);
     }
 
